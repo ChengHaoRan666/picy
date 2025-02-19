@@ -108,7 +108,65 @@
     <div class="p-6 bg-white shadow rounded-lg mt-4 w-full h-full flex flex-col overflow-auto">
         <!--TODO-->
         <div id="图床配置" class="tab-content ">
-            <p>图床配置内容</p>
+            <br>
+            <div class="p-6 bg-white shadow rounded-lg w-full">
+                <!-- 输入框 + 一键配置 -->
+                <div class="flex items-center space-x-4 mb-4">
+                    <input type="password" id="token" placeholder="请输入你的 Token"
+                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="autoConfigure()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">配置</button>
+                </div>
+
+                <!-- 用户名 & 仓库 -->
+                <div class="grid grid-cols-2 gap-4 items-center border p-4 rounded-lg">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-user text-gray-600"></i>
+                        <span class="text-gray-700">用户名：</span>
+                        <span id="username" class="text-blue-600 cursor-pointer">xxx</span>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-link text-gray-600"></i>
+                        <span class="text-gray-700">仓库：</span>
+                        <span id="repo" class="text-blue-600 cursor-pointer">xxx</span>
+                    </div>
+                </div>
+
+
+                <!-- 目录 -->
+                <div class="grid grid-cols-3 gap-4 items-center border p-4 rounded-lg mt-4">
+                    <!-- 左侧标题 -->
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-folder text-gray-600"></i>
+                        <span class="text-gray-700">目录：</span>
+                    </div>
+
+                    <!-- 目录选项和输入框 -->
+                    <div class="col-span-2 flex items-center space-x-6">
+                        <div class="flex items-center space-x-2">
+                            <input type="radio" name="dirType" value="root" checked>
+                            <label>根目录</label>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="radio" name="dirType" value="date">
+                            <label>日期目录</label>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="radio" name="dirType" value="custom">
+                            <label>新建目录</label>
+                        </div>
+                        <!-- 新建目录输入框 -->
+                        <input type="text" id="customDir" class="border p-2 rounded-lg w-1/3 hidden">
+                        <!-- 确定按钮 -->
+                        <button onclick="submitConfig()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">确定</button>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+
         </div>
         <div id="上传图片" class="tab-content hidden">
             <button class="px-4 py-2 bg-blue-500 text-white rounded">上传</button>
@@ -214,6 +272,50 @@
             })
             .catch(error => console.error("Error fetching user info:", error));
     });
+
+
+    // 图床配置
+    document.addEventListener("DOMContentLoaded", function () {
+        // 监听目录选项变化
+        document.querySelectorAll("input[name='dirType']").forEach(radio => {
+            radio.addEventListener("change", function () {
+                const customDirInput = document.getElementById("customDir");
+                customDirInput.classList.toggle("hidden", this.value !== "custom");
+            });
+        });
+    });
+
+    // 一键配置（可以从后端获取默认数据）
+    function autoConfigure() {
+        document.getElementById("username").innerText = "ChengHaoRan666";
+        document.getElementById("repo").innerText = "picx-images-hosting";
+        document.querySelector("input[name='dirType'][value='root']").checked = true;
+    }
+
+    // 提交数据到后端
+    function submitConfig() {
+        const token = document.getElementById("token").value;
+        const username = document.getElementById("username").innerText;
+        const repo = document.getElementById("repo").innerText;
+        const dirType = document.querySelector("input[name='dirType']:checked").value;
+        const customDir = document.getElementById("customDir").value;
+
+        const configData = {
+            token: token,
+            username: username,
+            repo: repo,
+            directory: dirType === "custom" ? customDir : dirType
+        };
+
+        fetch("/api/config", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(configData)
+        })
+            .then(response => response.json())
+            .then(data => alert("配置成功：" + JSON.stringify(data)))
+            .catch(error => console.error("提交失败:", error));
+    }
 
 
 </script>
