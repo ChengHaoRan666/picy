@@ -132,7 +132,6 @@
 <script>
     function changeTab(tabName) {
         document.getElementById("activeTab").innerText = tabName;
-        document.getElementById("content").innerText = "当前选择：" + tabName;
 
         // 隐藏所有内容
         document.querySelectorAll(".tab-content").forEach(tab => tab.classList.add("hidden"));
@@ -142,7 +141,10 @@
         document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("bg-gray-300"));
 
         // 给当前选中的按钮添加背景色
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add("bg-gray-300");
+        const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add("bg-gray-300");
+        }
     }
 
 
