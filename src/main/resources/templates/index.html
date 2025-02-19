@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PicX</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</head>
+<body class="bg-gray-100 h-screen flex overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 bg-white p-4 shadow-md">
+    <h1 class="text-xl font-bold mb-6">PicY</h1>
+    <nav class="space-y-2">
+        <button onclick="changeTab('图床配置')"
+                class="tab-btn block w-full text-left p-3 rounded-lg hover:bg-gray-300 mb-2" data-tab="图床配置">图床配置
+        </button>
+        <button onclick="changeTab('上传图片')"
+                class="tab-btn block w-full text-left p-3 rounded-lg hover:bg-gray-300 mb-2" data-tab="上传图片">上传图片
+        </button>
+        <button onclick="changeTab('图片管理')"
+                class="tab-btn block w-full text-left p-3 rounded-lg hover:bg-gray-300 mb-2" data-tab="图片管理">图片管理
+        </button>
+        <button onclick="changeTab('图片设置')"
+                class="tab-btn block w-full text-left p-3 rounded-lg hover:bg-gray-300 mb-2" data-tab="图片设置">图片设置
+        </button>
+        <button onclick="changeTab('工具箱')"
+                class="tab-btn block w-full text-left p-3 rounded-lg hover:bg-gray-300 mb-2" data-tab="工具箱">工具箱
+        </button>
+        <button onclick="changeTab('帮助反馈')"
+                class="tab-btn block w-full text-left p-3 rounded-lg hover:bg-gray-300 mb-2" data-tab="帮助反馈">帮助反馈
+        </button>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-6 flex flex-col h-full">
+    <!-- Top Bar -->
+    <div class="flex justify-between items-center mb-6">
+        <h4 class="text-4xl font-semibold" id="activeTab">图床配置</h4>
+        <div class="flex gap-4 items-center relative">
+            <div class="relative">
+                <!-- 通知图标，点击时显示模态框 -->
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-bell text-gray-600 text-xl cursor-pointer" onclick="toggleModal(true)"></i>
+                    <i class="fas fa-cog text-gray-600 text-xl cursor-pointer" onclick="toggleSettings(event)"></i>
+                    <img id="userAvatar" src="img/img.png" alt="用户头像"
+                         class="w-8 h-8 rounded-full object-cover cursor-pointer">
+                </div>
+
+                <div id="settingsDropdown" class="absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg p-4 hidden">
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="flex items-center w-10 h-6 bg-gray-300 rounded-full p-1 cursor-pointer"
+                                  onclick="toggleSwitch('watermark')">
+                                <span id="watermark"
+                                      class="bg-white w-4 h-4 rounded-full shadow transform duration-300 ease-in-out"></span>
+                            </span>
+                            <span class="whitespace-nowrap">图片水印</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="flex items-center w-10 h-6 bg-gray-300 rounded-full p-1 cursor-pointer"
+                                  onclick="toggleSwitch('compress')">
+                                <span id="compress"
+                                      class="bg-white w-4 h-4 rounded-full shadow transform duration-300 ease-in-out"></span>
+                            </span>
+                            <span class="whitespace-nowrap">压缩图片</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="flex items-center w-10 h-6 bg-gray-300 rounded-full p-1 cursor-pointer"
+                                  onclick="toggleSwitch('markdown')">
+                                <span id="markdown"
+                                      class="bg-white w-4 h-4 rounded-full shadow transform duration-300 ease-in-out"></span>
+                            </span>
+                            <span class="whitespace-nowrap">转换 Markdown</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知弹窗 -->
+    <div id="notificationModal"
+         class="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg w-1/3 hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">网站公告</h3>
+            <button onclick="toggleModal(false)" class="text-gray-600 text-lg">&times;</button>
+        </div>
+        <ul class="text-gray-700">
+            <li th:each="notice : ${notices}" th:text="${notice}"></li>
+        </ul>
+        <div class="mt-4 text-right">
+            <button onclick="toggleModal(false)" class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">关闭
+            </button>
+        </div>
+    </div>
+
+    <!-- Dynamic Content -->
+    <div class="p-6 bg-white shadow rounded-lg mt-4 w-full h-full flex flex-col overflow-auto">
+        <!--TODO-->
+        <p class="text-gray-600" id="content">当前选择：图床配置</p>
+        <div id="图床配置" class="tab-content">
+            <p>图床配置内容</p>
+        </div>
+        <div id="上传图片" class="tab-content hidden">
+            <button class="px-4 py-2 bg-blue-500 text-white rounded">上传</button>
+        </div>
+        <div id="图片管理" class="tab-content hidden">
+            <p>图片管理内容</p>
+        </div>
+        <div id="图片设置" class="tab-content hidden">
+            <p>图片设置内容</p>
+        </div>
+        <div id="工具箱" class="tab-content hidden">
+            <p>工具箱功能</p>
+        </div>
+        <div id="帮助反馈" class="tab-content hidden">
+            <p>帮助反馈信息</p>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function changeTab(tabName) {
+        document.getElementById("activeTab").innerText = tabName;
+        document.getElementById("content").innerText = "当前选择：" + tabName;
+
+        document.querySelectorAll(".tab-content").forEach(tab => tab.classList.add("hidden"));
+        document.getElementById(tabName).classList.remove("hidden");
+    }
+
+
+    function toggleModal(show) {
+        document.getElementById("notificationModal").classList.toggle("hidden", !show);
+    }
+
+    function toggleSettings(event) {
+        event.stopPropagation();  // 阻止事件冒泡，避免被 document 点击监听器捕获
+        const settingsDropdown = document.getElementById("settingsDropdown");
+        settingsDropdown.classList.toggle("hidden");
+    }
+
+    function toggleSwitch(id) {
+        const element = document.getElementById(id);
+        element.parentElement.classList.toggle('bg-blue-500');
+        element.classList.toggle('translate-x-4');
+        saveSettings();
+    }
+
+    function saveSettings() {
+        const settings = {
+            watermark: document.getElementById("watermark").parentElement.classList.contains('bg-blue-500'),
+            compress: document.getElementById("compress").parentElement.classList.contains('bg-blue-500'),
+            markdown: document.getElementById("markdown").parentElement.classList.contains('bg-blue-500')
+        };
+        fetch('/api/save-settings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(settings)
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const settingsIcon = document.querySelector(".fa-cog");
+        const settingsDropdown = document.getElementById("settingsDropdown");
+
+        settingsIcon.addEventListener("click", function (event) {
+            toggleSettings(event);
+        });
+
+        document.addEventListener("click", function (event) {
+            const notificationModal = document.getElementById("notificationModal");
+            const bellIcon = document.querySelector(".fa-bell");
+
+            // 关闭通知弹窗
+            if (!notificationModal.contains(event.target) && !bellIcon.contains(event.target)) {
+                notificationModal.classList.add("hidden");
+            }
+
+            // 关闭设置菜单
+            if (!settingsDropdown.contains(event.target) && !settingsIcon.contains(event.target)) {
+                settingsDropdown.classList.add("hidden");
+            }
+        });
+    });
+
+    // 处理头像
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch('/api/user/info')  // 调用后端 API
+            .then(response => response.json())
+            .then(data => {
+                const avatarElement = document.getElementById("userAvatar");
+                if (data.avatar) {
+                    avatarElement.src = data.avatar;  // 更新头像
+                }
+            })
+            .catch(error => console.error("Error fetching user info:", error));
+    });
+
+
+</script>
+</body>
+</html>
