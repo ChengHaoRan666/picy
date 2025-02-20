@@ -12,5 +12,4 @@ public class PicyApplication {
         SpringApplication.run(PicyApplication.class, args);
         log.info("service...");
     }
-
 }

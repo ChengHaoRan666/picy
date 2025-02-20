@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PicX</title>
+    <title>PicY</title>
+    <link rel="stylesheet" type="text/css" href="/css/Upload.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="/js/Upload.js"></script>
+    <script src="/js/picyConfig.js"></script>
 </head>
 
 <body class="bg-gray-100 h-screen flex overflow-hidden">
@@ -52,7 +56,7 @@
                 <div class="flex items-center space-x-4">
                     <i class="fas fa-bell text-gray-600 text-xl cursor-pointer" onclick="toggleModal(true)"></i>
                     <i class="fas fa-cog text-gray-600 text-xl cursor-pointer" onclick="toggleSettings(event)"></i>
-                    <img id="userAvatar" src="img/img.png" alt="用户头像"
+                    <img id="userAvatar" src="/img/img.png" alt="用户头像"
                          class="w-8 h-8 rounded-full object-cover cursor-pointer">
                 </div>
 
@@ -106,7 +110,6 @@
 
     <!-- 主体 -->
     <div class="p-6 bg-white shadow rounded-lg mt-4 w-full h-full flex flex-col overflow-auto">
-        <!--TODO-->
         <div id="图床配置" class="tab-content ">
             <br>
             <div class="p-6 bg-white shadow rounded-lg w-full">
@@ -158,19 +161,21 @@
                         <!-- 新建目录输入框 -->
                         <input type="text" id="customDir" class="border p-2 rounded-lg w-1/3 hidden">
                         <!-- 确定按钮 -->
-                        <button onclick="submitConfig()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">确定</button>
+                        <button onclick="submitConfig()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">确定
+                        </button>
                     </div>
                 </div>
-
-
-
             </div>
-
-
         </div>
         <div id="上传图片" class="tab-content hidden">
-            <button class="px-4 py-2 bg-blue-500 text-white rounded">上传</button>
+            <div class="dropzone" id="dropzone">
+                <span th:text="#{variable}">拖拽 / 粘贴 / 点击此处选择图片</span>
+            </div>
+            目录：
+            <button onclick="submitConfig()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">上传
+            </button>
         </div>
+        <!--TODO-->
         <div id="图片管理" class="tab-content hidden">
             <p>图片管理内容</p>
         </div>
@@ -187,137 +192,8 @@
     </div>
 </main>
 
-<script>
-    function changeTab(tabName) {
-        document.getElementById("activeTab").innerText = tabName;
 
-        // 隐藏所有内容
-        document.querySelectorAll(".tab-content").forEach(tab => tab.classList.add("hidden"));
-        document.getElementById(tabName).classList.remove("hidden");
+<input type="file" id="fileInput" style="display:none;">
 
-        // 移除所有按钮的选中状态
-        document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("bg-gray-300"));
-
-        // 给当前选中的按钮添加背景色
-        const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add("bg-gray-300");
-        }
-    }
-
-
-    function toggleModal(show) {
-        document.getElementById("notificationModal").classList.toggle("hidden", !show);
-    }
-
-    function toggleSettings(event) {
-        event.stopPropagation();  // 阻止事件冒泡，避免被 document 点击监听器捕获
-        const settingsDropdown = document.getElementById("settingsDropdown");
-        settingsDropdown.classList.toggle("hidden");
-    }
-
-    function toggleSwitch(id) {
-        const element = document.getElementById(id);
-        element.parentElement.classList.toggle('bg-blue-500');
-        element.classList.toggle('translate-x-4');
-        saveSettings();
-    }
-
-    function saveSettings() {
-        const settings = {
-            watermark: document.getElementById("watermark").parentElement.classList.contains('bg-blue-500'),
-            compress: document.getElementById("compress").parentElement.classList.contains('bg-blue-500'),
-            markdown: document.getElementById("markdown").parentElement.classList.contains('bg-blue-500')
-        };
-        fetch('/api/save-settings', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(settings)
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const settingsIcon = document.querySelector(".fa-cog");
-        const settingsDropdown = document.getElementById("settingsDropdown");
-
-        settingsIcon.addEventListener("click", function (event) {
-            toggleSettings(event);
-        });
-
-        document.addEventListener("click", function (event) {
-            const notificationModal = document.getElementById("notificationModal");
-            const bellIcon = document.querySelector(".fa-bell");
-
-            // 关闭通知弹窗
-            if (!notificationModal.contains(event.target) && !bellIcon.contains(event.target)) {
-                notificationModal.classList.add("hidden");
-            }
-
-            // 关闭设置菜单
-            if (!settingsDropdown.contains(event.target) && !settingsIcon.contains(event.target)) {
-                settingsDropdown.classList.add("hidden");
-            }
-        });
-    });
-
-    // 处理头像
-    document.addEventListener("DOMContentLoaded", function () {
-        fetch('/api/user/info')  // 调用后端 API
-            .then(response => response.json())
-            .then(data => {
-                const avatarElement = document.getElementById("userAvatar");
-                if (data.avatar) {
-                    avatarElement.src = data.avatar;  // 更新头像
-                }
-            })
-            .catch(error => console.error("Error fetching user info:", error));
-    });
-
-
-    // 图床配置
-    document.addEventListener("DOMContentLoaded", function () {
-        // 监听目录选项变化
-        document.querySelectorAll("input[name='dirType']").forEach(radio => {
-            radio.addEventListener("change", function () {
-                const customDirInput = document.getElementById("customDir");
-                customDirInput.classList.toggle("hidden", this.value !== "custom");
-            });
-        });
-    });
-
-    // 一键配置（可以从后端获取默认数据）
-    function autoConfigure() {
-        document.getElementById("username").innerText = "ChengHaoRan666";
-        document.getElementById("repo").innerText = "picx-images-hosting";
-        document.querySelector("input[name='dirType'][value='root']").checked = true;
-    }
-
-    // 提交数据到后端
-    function submitConfig() {
-        const token = document.getElementById("token").value;
-        const username = document.getElementById("username").innerText;
-        const repo = document.getElementById("repo").innerText;
-        const dirType = document.querySelector("input[name='dirType']:checked").value;
-        const customDir = document.getElementById("customDir").value;
-
-        const configData = {
-            token: token,
-            username: username,
-            repo: repo,
-            directory: dirType === "custom" ? customDir : dirType
-        };
-
-        fetch("/api/config", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(configData)
-        })
-            .then(response => response.json())
-            .then(data => alert("配置成功：" + JSON.stringify(data)))
-            .catch(error => console.error("提交失败:", error));
-    }
-
-
-</script>
 </body>
 </html>
