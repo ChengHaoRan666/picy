@@ -38,7 +38,7 @@ function saveSettings() {
     };
 
     // 发送数据到后端，进行保存
-    fetch('/api/save-settings', {
+    fetch('/save-settings', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(settings)
@@ -80,18 +80,6 @@ function toggleSwitch(id) {
     saveSettings();
 }
 
-// 页面加载时，从后端获取用户头像并更新 UI
-document.addEventListener("DOMContentLoaded", function () {
-    fetch('/api/user/info')  // 发送请求获取用户信息
-        .then(response => response.json())
-        .then(data => {
-            const avatarElement = document.getElementById("userAvatar");
-            if (data.avatar) {
-                avatarElement.src = data.avatar;  // 更新头像
-            }
-        })
-        .catch(error => console.error("Error fetching user info:", error));
-});
 
 // 监听目录选择，切换“新建目录”输入框的显示状态
 document.addEventListener("DOMContentLoaded", function () {
@@ -111,7 +99,7 @@ async function autoConfigure() {
 
     // 发送请求到后端
     try {
-        const response = await fetch("/api/configure", {
+        const response = await fetch("/configure", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -130,6 +118,14 @@ async function autoConfigure() {
             document.getElementById("location").innerText = data.location;
             document.getElementById("repo").innerText = data.repo;
             alert("配置成功！");
+
+            // 发送请求获取 OSS 配置文件
+            fetch("/get-settings")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("获取 OSS 配置失败");
+                    }
+                })
         } else {
             alert("配置失败：" + data.message);
         }
@@ -155,7 +151,7 @@ function submitConfig() {
     };
 
     // 发送 POST 请求到后端
-    fetch("/api/config", {
+    fetch("/config", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(configData)

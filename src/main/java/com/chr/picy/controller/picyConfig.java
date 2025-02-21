@@ -2,17 +2,18 @@ package com.chr.picy.controller;
 
 import com.aliyun.oss.OSS;
 import com.chr.picy.util.JWTUtil;
-import com.chr.picy.util.OssUtil;
+import com.chr.picy.util.OSSUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.*;
 
@@ -23,7 +24,7 @@ public class picyConfig {
     private JWTUtil jwtUtil;
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String home(Model model, @CookieValue(value = "token", required = false) String token, HttpServletResponse response) {
         List<String> notices = Arrays.asList(
                 "PicX v3.0 进一步简化用户操作，统一使用内置的仓库和分支",
                 "如果你需要继续使用自定义的仓库和分支，请使用 PicX v2.0"
@@ -32,27 +33,23 @@ public class picyConfig {
         return "index";
     }
 
-    // 发送设置的状态到后端
-    @PostMapping("/api/save-settings")
-    public String saveSettings(@RequestBody Map<String, Boolean> settings) {
-        log.info("后端接收到发送的信息: {}", settings);
+    // 发送设置的状态到后端,写入json文件
+    @PostMapping("/save-settings")
+    public String saveSettings(@RequestBody Map<String, Object> settings) {
+        log.info("进行设置参数");
         return "index";
     }
 
-    // 从后端获取配置信息返回给前端
-    @GetMapping("/api/get-settings")
+    // 从后端获取配置信息返回给前端，从json文件中读
+    @GetMapping("/get-settings")
     public String getSettings() {
-        return "index";
-    }
-
-    // 获取用户头像
-    @RequestMapping("/api/user/info")
-    public String getUserInfo() {
+        log.info("读取参数配置");
         return "index";
     }
 
 
-    @PostMapping("/api/configure")
+    // 登录
+    @PostMapping("/configure")
     public ResponseEntity<?> configureOss(@RequestBody Map<String, String> config) {
         String accessKeyId = config.get("accessKeyId");
         String accessKeySecret = config.get("accessKeySecret");
@@ -60,7 +57,7 @@ public class picyConfig {
 
         try {
             // 获取OSS连接
-            OSS ossClient = OssUtil.getOssClient(accessKeyId, accessKeySecret, bucketName);
+            OSS ossClient = OSSUtil.getOssClient(accessKeyId, accessKeySecret, bucketName);
             // 生成 JWT
             String token = jwtUtil.getJWTToken(accessKeyId, accessKeySecret, bucketName);
 

@@ -16,7 +16,7 @@ import com.aliyun.oss.model.GenericRequest;
  * @Description: OSS的辅助方法
  */
 
-public class OssUtil {
+public class OSSUtil {
 
     public static String getRegionFromBucket(String accessKeyId, String accessKeySecret, String bucketName) {
         // 先用一个默认的公共 endpoint 连接
