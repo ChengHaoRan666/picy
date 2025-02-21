@@ -72,6 +72,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// 将按钮变色
+function toggleSwitch(id) {
+    const element = document.getElementById(id);
+    element.parentElement.classList.toggle('bg-blue-500');
+    element.classList.toggle('translate-x-4');
+    saveSettings();
+}
+
 // 页面加载时，从后端获取用户头像并更新 UI
 document.addEventListener("DOMContentLoaded", function () {
     fetch('/api/user/info')  // 发送请求获取用户信息
@@ -96,16 +104,44 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // 自动配置默认的图床信息（用户名、仓库）
-function autoConfigure() {
-    document.getElementById("username").innerText = "xxx";
-    document.getElementById("repo").innerText = "xxx";
-    document.querySelector("input[name='dirType'][value='root']").checked = true;
+async function autoConfigure() {
+    const accessKeyId = document.getElementById("accessKeyId").value;
+    const accessKeySecret = document.getElementById("accessKeySecret").value;
+    const bucketName = document.getElementById("bucketName").value;
+
+    // 发送请求到后端
+    try {
+        const response = await fetch("/api/configure", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                accessKeyId: accessKeyId,
+                accessKeySecret: accessKeySecret,
+                bucketName: bucketName
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // 配置成功，更新用户名和仓库
+            document.getElementById("location").innerText = data.location;
+            document.getElementById("repo").innerText = data.repo;
+            alert("配置成功！");
+        } else {
+            alert("配置失败：" + data.message);
+        }
+    } catch (error) {
+        alert("请求失败：" + error.message);
+    }
 }
 
 // 提交图床配置到后端
 function submitConfig() {
     const token = document.getElementById("token").value;
-    const username = document.getElementById("username").innerText;
+    const location = document.getElementById("location").innerText;
     const repo = document.getElementById("repo").innerText;
     const dirType = document.querySelector("input[name='dirType']:checked").value;
     const customDir = document.getElementById("customDir").value;
@@ -113,7 +149,7 @@ function submitConfig() {
     // 组装提交数据
     const configData = {
         token: token,
-        username: username,
+        location: location,
         repo: repo,
         directory: dirType === "custom" ? customDir : dirType
     };
