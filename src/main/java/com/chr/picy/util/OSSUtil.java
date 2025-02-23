@@ -9,13 +9,14 @@ import com.aliyun.oss.common.auth.DefaultCredentialProvider;
 import com.aliyun.oss.common.comm.SignVersion;
 import com.aliyun.oss.model.BucketInfo;
 import com.aliyun.oss.model.GenericRequest;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @Author: 程浩然
  * @Create: 2025/2/21 - 11:43
  * @Description: OSS的辅助方法
  */
-
+@Configuration
 public class OSSUtil {
 
     public static String getRegionFromBucket(String accessKeyId, String accessKeySecret, String bucketName) {
@@ -35,6 +36,7 @@ public class OSSUtil {
             ossClient.shutdown();
         }
     }
+
 
     public static OSS getOssClient(String accessKeyId, String accessKeySecret, String bucketName) {
         CredentialsProvider credentialsProvider = new DefaultCredentialProvider(accessKeyId, accessKeySecret);

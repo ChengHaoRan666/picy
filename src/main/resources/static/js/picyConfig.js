@@ -124,6 +124,8 @@ async function autoConfigure() {
                 .then(response => {
                     if (!response.ok) {
                         throw new Error("获取 OSS 配置失败");
+                    } else {
+                        alert("配置成功")
                     }
                 })
         } else {
