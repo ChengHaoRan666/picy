@@ -18,10 +18,10 @@ public class webConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(jwtInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns("/")
-                .excludePathPatterns("/configure")
-                .excludePathPatterns("/js/**", "/css/**", "/img/**", "/favicon.ico");
+//        registry.addInterceptor(jwtInterceptor)
+//                .addPathPatterns("/**")
+//                .excludePathPatterns("/")
+//                .excludePathPatterns("/configure")
+//                .excludePathPatterns("/js/**", "/css/**", "/img/**", "/favicon.ico");
     }
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -19,6 +20,8 @@ import java.util.Optional;
 @Component
 @Slf4j
 public class JwtInterceptor implements HandlerInterceptor {
+    @Autowired
+    private JWTUtil jwtUtil;
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         Cookie[] cookies = request.getCookies();
@@ -31,7 +34,7 @@ public class JwtInterceptor implements HandlerInterceptor {
                 .filter(cookie -> "token".equals(cookie.getName()))
                 .findFirst();
 
-        if (tokenCookie.isEmpty() || JWTUtil.isTokenExpired(tokenCookie.get().getValue())) {
+        if (tokenCookie.isEmpty() || jwtUtil.isTokenExpired(tokenCookie.get().getValue())) {
             Cookie deleteCookie = new Cookie("token", "");
             deleteCookie.setMaxAge(0);
             deleteCookie.setPath("/");

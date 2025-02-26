@@ -1,7 +1,11 @@
 package com.chr.picy.controller;
 
 import com.aliyun.oss.OSS;
+import com.chr.picy.Bean.SecretKey;
 import com.chr.picy.util.JWTUtil;
+import com.chr.picy.util.OSSUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +23,7 @@ import java.util.*;
 @Controller
 public class picyConfig {
     @Autowired
-    private OSS ossClient;
+    private JWTUtil jwtUtil;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -33,33 +37,29 @@ public class picyConfig {
 
     // 登录并保存配置到 Session
     @PostMapping("/configure")
-    public ResponseEntity<?> configureOss(@RequestBody Map<String, String> config, HttpSession session) {
-        String accessKeyId = config.get("accessKeyId");
-        String accessKeySecret = config.get("accessKeySecret");
-        String bucketName = config.get("bucketName");
-
+    public ResponseEntity<?> configureOss(@RequestBody SecretKey secretKey, HttpServletResponse response) {
+        String accessKeyId = secretKey.getAccessKeyId();
+        String accessKeySecret = secretKey.getAccessKeySecret();
+        String bucketName = secretKey.getBucketName();
+        // 生成 JWT
+        String token = jwtUtil.getJWTToken(accessKeyId, accessKeySecret, bucketName);
+        response.addCookie(new Cookie("token", token));
+        OSS ossClient = OSSUtil.getOssClient();
         try {
-            // 保存到 Session 中
-            session.setAttribute("accessKeyId", accessKeyId);
-            session.setAttribute("accessKeySecret", accessKeySecret);
-            session.setAttribute("bucketName", bucketName);
-
-            // 生成 JWT
-            String token = JWTUtil.getJWTToken(accessKeyId, accessKeySecret, bucketName);
 
             // 获取位置
             String location = ossClient.getBucketLocation(bucketName);
             System.out.println(location);
 
             // 返回成功信息
-            Map<String, String> response = new HashMap<>();
-            response.put("location", location);
-            response.put("repo", bucketName);
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("location", location);
+            responseMap.put("repo", bucketName);
 
             // 将 JWT 存入 Cookie
             return ResponseEntity.ok()
                     .header("Set-Cookie", "token=" + token + "; HttpOnly; Path=/; Max-Age=1296000")
-                    .body(response);
+                    .body(responseMap);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -70,6 +70,7 @@ public class picyConfig {
     // 获取配置信息
     @GetMapping("/get-settings")
     public String getSettings(HttpSession session) {
+        OSS ossClient = OSSUtil.getOssClient();
         String accessKeyId = (String) session.getAttribute("accessKeyId");
         String accessKeySecret = (String) session.getAttribute("accessKeySecret");
         String bucketName = (String) session.getAttribute("bucketName");

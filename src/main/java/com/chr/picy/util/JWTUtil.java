@@ -19,10 +19,10 @@ import java.util.Map;
 @Component
 public class JWTUtil {
     @Value("${jwt.secret-key}")
-    private static String secretKey;
+    public String secretKey;
 
     @Value("${jwt.ttl}")
-    private static long ttl;
+    public long ttl;
 
 
     /**
@@ -30,7 +30,7 @@ public class JWTUtil {
      *
      * @return
      */
-    public static String getJWTToken(String accessKeyId, String accessKeySecret, String bucketName) {
+    public String getJWTToken(String accessKeyId, String accessKeySecret, String bucketName) {
         Map<String, Object> credentials = new HashMap<>();
         credentials.put("accessKeyId", accessKeyId);
         credentials.put("accessKeySecret", accessKeySecret);
@@ -45,7 +45,7 @@ public class JWTUtil {
     /**
      * 解析JWT令牌
      */
-    public static Claims parseToken(String token) {
+    public Claims parseToken(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
@@ -55,7 +55,7 @@ public class JWTUtil {
     /**
      * 检查JWT是否过期
      */
-    public static boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         if (token == null || token.isEmpty())
             return true;
         try {
@@ -69,7 +69,7 @@ public class JWTUtil {
     /**
      * 获取新的JWT并延长过期时间
      */
-    public static String refreshToken(String oldToken) {
+    public String refreshToken(String oldToken) {
         Claims claims = parseToken(oldToken);  // 解析旧的Token
         // 根据旧的Token信息生成新的Token（重新设置有效期）
         return Jwts.builder()
