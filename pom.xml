@@ -74,12 +74,14 @@
             <version>2.3.3</version>
         </dependency>
 
-        <!--创建和解析JSON Web Token（JWT）的Java库-->
+
+        <!-- Sa-Token 权限认证，在线文档：https://sa-token.cc -->
         <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>0.9.1</version>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
+            <version>1.40.0</version>
         </dependency>
+
     </dependencies>
 
     <build>

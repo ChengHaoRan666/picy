@@ -13,7 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SecretKey {
+
     String accessKeyId;
+
     String accessKeySecret;
+
     String bucketName;
 }

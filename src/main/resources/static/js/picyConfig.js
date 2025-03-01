@@ -117,7 +117,7 @@ async function autoConfigure() {
             // 配置成功，更新用户名和仓库
             document.getElementById("location").innerText = data.location;
             document.getElementById("repo").innerText = data.repo;
-            alert("配置成功！");
+            // alert("配置成功！");
 
             // 发送请求获取 OSS 配置文件
             fetch("/get-settings")
@@ -125,7 +125,9 @@ async function autoConfigure() {
                     if (!response.ok) {
                         throw new Error("获取 OSS 配置失败");
                     } else {
-                        alert("配置成功")
+                        document.getElementById("location").innerText = "1";
+                        document.getElementById("repo").innerText = "2";
+                        alert("获取配置文件配置成功")
                     }
                 })
         } else {
@@ -153,7 +155,7 @@ function submitConfig() {
     };
 
     // 发送 POST 请求到后端
-    fetch("/config", {
+    fetch("/save-settings", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(configData)
