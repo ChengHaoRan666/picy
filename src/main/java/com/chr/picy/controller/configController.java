@@ -39,6 +39,7 @@ public class configController {
         if (accessKeyId != null && accessKeySecret != null && bucketName != null) {
             log.info("从 session 读取 OSS 登录信息");
             OSS ossClient = OSSUtil.getOssClient(accessKeyId, accessKeySecret, bucketName);
+            // 将 OSS 放在 Spring 里管理
             ossClientManager.setOssClient(ossClient, bucketName);
             return "index";
         }
@@ -63,12 +64,12 @@ public class configController {
             // 获取存储桶信息
             String location = ossClient.getBucketLocation(bucketName);
 
-            // **🔹 存储到 Session**
+            //  存储到 Session
             session.setAttribute("accessKeyId", accessKeyId);
             session.setAttribute("accessKeySecret", accessKeySecret);
             session.setAttribute("bucketName", bucketName);
 
-            // **🔹 存储到 OSS 的 `setting.json`**
+            // 存储到 OSS 的 setting.json
             Map<String, String> settings = new HashMap<>();
             settings.put("accessKeyId", accessKeyId);
             settings.put("accessKeySecret", accessKeySecret);
@@ -86,18 +87,39 @@ public class configController {
 
     // 获取配置信息
     @GetMapping("/get-settings")
-    public String getSettings(HttpSession session) {
+    public String getSettings() {
         OSS ossClient = ossClientManager.getOssClient();
-        Map map = OSSUtil.readJsonFromOSS(ossClient, (String) session.getAttribute("bucketName"), "setting.json");
+        Map map = OSSUtil.readJsonFromOSS(ossClient, ossClientManager.getBucketName(), "setting.json");
         log.info("读取的内容{}", map);
         return "index";  // 或者根据需求返回配置信息
     }
 
     // 发送设置的状态到后端,写入json文件
     @PostMapping("/save-settings")
-    public String saveSettings(@RequestBody Map<String, Object> settings) {
+    public ResponseEntity<?> saveSettings(@RequestBody Map<String, String> settings) {
         log.info("进行设置参数{}", settings);
-        return "index";
+        OSS ossClient = ossClientManager.getOssClient();
+        try {
+            OSSUtil.saveSettingsToOSS(ossClient, ossClientManager.getBucketName(), settings);
+        } catch (Exception e) {
+            log.error("json配置文件上传到OSS失败", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "json配置文件上传到OSS失败"));
+        }
+        return ResponseEntity.ok(Collections.singletonMap("message", "Settings saved successfully"));
     }
 
 }
+
+/*
+ * 图片水印
+ * 压缩图片
+ * 压缩算法
+ * 转换Markdown
+ *
+ * 目录
+ *
+ * 秘钥key
+ * 秘钥val
+ * 存储桶
+ */

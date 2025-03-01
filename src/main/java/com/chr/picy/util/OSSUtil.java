@@ -27,6 +27,13 @@ import java.util.Map;
 public class OSSUtil {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * 向setting.json文件里存配置信息
+     * @param ossClient
+     * @param bucketName
+     * @param settings
+     * @throws Exception
+     */
     public static void saveSettingsToOSS(OSS ossClient, String bucketName, Map<String, String> settings) throws Exception {
         String jsonString = objectMapper.writeValueAsString(settings);
         InputStream inputStream = new java.io.ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
@@ -84,6 +91,14 @@ public class OSSUtil {
                 .build();
     }
 
+
+    /**
+     * 获取 json 文件内容
+     * @param ossClient
+     * @param bucketName
+     * @param jsonFile
+     * @return
+     */
     public static Map readJsonFromOSS(OSS ossClient, String bucketName, String jsonFile) {
         try {
             // 获取 OSS 上的 JSON 文件对象

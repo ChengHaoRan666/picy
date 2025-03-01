@@ -29,22 +29,6 @@ function toggleSettings(event) {
     settingsDropdown.classList.toggle("hidden");
 }
 
-// 保存用户的图床设置（例如：水印、压缩、Markdown）
-function saveSettings() {
-    const settings = {
-        watermark: document.getElementById("watermark").parentElement.classList.contains('bg-blue-500'),
-        compress: document.getElementById("compress").parentElement.classList.contains('bg-blue-500'),
-        markdown: document.getElementById("markdown").parentElement.classList.contains('bg-blue-500')
-    };
-
-    // 发送数据到后端，进行保存
-    fetch('/save-settings', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(settings)
-    });
-}
-
 // 在页面加载完成后，绑定事件监听器
 document.addEventListener("DOMContentLoaded", function () {
     const settingsIcon = document.querySelector(".fa-cog"); // 获取设置图标
@@ -117,7 +101,6 @@ async function autoConfigure() {
             // 配置成功，更新用户名和仓库
             document.getElementById("location").innerText = data.location;
             document.getElementById("repo").innerText = data.repo;
-            // alert("配置成功！");
 
             // 发送请求获取 OSS 配置文件
             fetch("/get-settings")
@@ -125,8 +108,6 @@ async function autoConfigure() {
                     if (!response.ok) {
                         throw new Error("获取 OSS 配置失败");
                     } else {
-                        document.getElementById("location").innerText = "1";
-                        document.getElementById("repo").innerText = "2";
                         alert("获取配置文件配置成功")
                     }
                 })
@@ -137,6 +118,37 @@ async function autoConfigure() {
         alert("请求失败：" + error.message);
     }
 }
+
+
+// 保存用户的图床设置（例如：水印、压缩、Markdown、哈希化）
+function saveSettings() {
+    const settings = {
+        watermark: document.getElementById("watermark").parentElement.classList.contains('bg-blue-500'),
+        compress: document.getElementById("compress").parentElement.classList.contains('bg-blue-500'),
+        markdown: document.getElementById("markdown").parentElement.classList.contains('bg-blue-500'),
+        Hashization: document.getElementById("Hashization").parentElement.classList.contains('bg-blue-500')
+    };
+
+    fetch('/save-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === "Settings saved successfully") {
+                alert("配置保存成功！");
+            } else {
+                alert("保存失败：" + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("请求失败:", error);
+            alert("保存失败，发生错误");
+        });
+
+}
+
 
 // 提交图床配置到后端
 function submitConfig() {
