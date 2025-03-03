@@ -1,4 +1,4 @@
-package com.chr.picy.service;
+package com.chr.picy.Bean;
 
 
 import com.aliyun.oss.OSS;

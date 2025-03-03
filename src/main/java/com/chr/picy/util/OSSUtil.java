@@ -11,12 +11,12 @@ import com.aliyun.oss.model.BucketInfo;
 import com.aliyun.oss.model.GenericRequest;
 import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.PutObjectRequest;
+import com.chr.picy.Bean.Parameter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /**
  * @Author: 程浩然
@@ -29,15 +29,38 @@ public class OSSUtil {
 
     /**
      * 向setting.json文件里存配置信息
-     * @param ossClient
-     * @param bucketName
-     * @param settings
-     * @throws Exception
      */
-    public static void saveSettingsToOSS(OSS ossClient, String bucketName, Map<String, String> settings) throws Exception {
-        String jsonString = objectMapper.writeValueAsString(settings);
+    public static void saveSettingsToOSS(OSS ossClient, String bucketName, Parameter parameter) throws Exception {
+        // 先获取旧配置信息，如果有变动，更新
+        Parameter oldParameter = readJsonFromOSS(ossClient, bucketName, "setting.json");
+        parameter = updateParameter(oldParameter, parameter);
+        String jsonString = objectMapper.writeValueAsString(parameter);
         InputStream inputStream = new java.io.ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
         ossClient.putObject(new PutObjectRequest(bucketName, "setting.json", inputStream));
+    }
+
+    /**
+     * 辅助函数，比较旧配置类和新配置类的不同进行合并
+     *
+     * @param oldParameter 旧配置类
+     * @param newParameter 新配置类
+     * @return 合并后的配置类
+     */
+    private static Parameter updateParameter(Parameter oldParameter, Parameter newParameter) {
+        if (oldParameter == null) return newParameter; // 旧配置为空，直接使用新配置
+
+        if (newParameter == null) return oldParameter; // 新配置为空，保持旧配置
+
+        return new Parameter(
+                newParameter.getCompress() != null ? newParameter.getCompress() : oldParameter.getCompress(),
+                newParameter.getCompressionAlgorithm() != null ? newParameter.getCompressionAlgorithm() : oldParameter.getCompressionAlgorithm(),
+                newParameter.getConvertMarkdown() != null ? newParameter.getConvertMarkdown() : oldParameter.getConvertMarkdown(),
+                newParameter.getHashization() != null ? newParameter.getHashization() : oldParameter.getHashization(),
+                newParameter.getCatalogue() != null ? newParameter.getCatalogue() : oldParameter.getCatalogue(),
+                newParameter.getAccessKeyId() != null ? newParameter.getAccessKeyId() : oldParameter.getAccessKeyId(),
+                newParameter.getAccessKeySecret() != null ? newParameter.getAccessKeySecret() : oldParameter.getAccessKeySecret(),
+                newParameter.getBucketName() != null ? newParameter.getBucketName() : oldParameter.getBucketName()
+        );
     }
 
 
@@ -94,19 +117,20 @@ public class OSSUtil {
 
     /**
      * 获取 json 文件内容
+     *
      * @param ossClient
      * @param bucketName
      * @param jsonFile
      * @return
      */
-    public static Map readJsonFromOSS(OSS ossClient, String bucketName, String jsonFile) {
+    public static Parameter readJsonFromOSS(OSS ossClient, String bucketName, String jsonFile) {
         try {
             // 获取 OSS 上的 JSON 文件对象
             OSSObject ossObject = ossClient.getObject(bucketName, jsonFile);
             InputStream content = ossObject.getObjectContent();
 
             // 解析 JSON 并返回 Map
-            return objectMapper.readValue(content, Map.class);
+            return objectMapper.readValue(content, Parameter.class);
         } catch (Exception e) {
             log.error("读取 OSS JSON 文件失败: {}", jsonFile, e);
             return null;

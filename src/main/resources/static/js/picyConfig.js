@@ -120,10 +120,9 @@ async function autoConfigure() {
 }
 
 
-// 保存用户的图床设置（例如：水印、压缩、Markdown、哈希化）
+// 保存用户的图床设置（例如：压缩、Markdown、哈希化）
 function saveSettings() {
     const settings = {
-        watermark: document.getElementById("watermark").parentElement.classList.contains('bg-blue-500'),
         compress: document.getElementById("compress").parentElement.classList.contains('bg-blue-500'),
         markdown: document.getElementById("markdown").parentElement.classList.contains('bg-blue-500'),
         Hashization: document.getElementById("Hashization").parentElement.classList.contains('bg-blue-500')
