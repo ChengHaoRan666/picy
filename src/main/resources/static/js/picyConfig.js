@@ -57,13 +57,14 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // 将按钮变色
-function toggleSwitch(id) {
+// 两个地方用：1. 用户修改配置，需要传入true让配置保存 2. 在登录时把用户的配置显示
+function toggleSwitch(id, save) {
     const element = document.getElementById(id);
     element.parentElement.classList.toggle('bg-blue-500');
     element.classList.toggle('translate-x-4');
-    saveSettings();
+    // 如果将配置保存
+    if (save) saveSettings();
 }
-
 
 // 监听目录选择，切换“新建目录”输入框的显示状态
 document.addEventListener("DOMContentLoaded", function () {
@@ -75,8 +76,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// 自动配置默认的图床信息（用户名、仓库）
+
+// 登录
 async function autoConfigure() {
+    // 获取输入的秘钥
     const accessKeyId = document.getElementById("accessKeyId").value;
     const accessKeySecret = document.getElementById("accessKeySecret").value;
     const bucketName = document.getElementById("bucketName").value;
@@ -96,21 +99,28 @@ async function autoConfigure() {
         });
 
         const data = await response.json();
-
+        // 获取后端传过来的配置信息
+        const parameter = data.parameter;
         if (response.ok) {
-            // 配置成功，更新用户名和仓库
+            // 配置成功，更新地点和仓库
             document.getElementById("location").innerText = data.location;
             document.getElementById("repo").innerText = data.repo;
+            // 通过Parameter修改其他配置的前端显示
+            console.log(parameter);
+            console.log(parameter.compress);
+            if (parameter.compress) {
+                console.log("压缩图片生效")
+                toggleSwitch('compress',false)
+            }
+            if (parameter.hashization) {
+                console.log("转换Markdown生效")
+                toggleSwitch('markdown',false)
+            }
+            if (parameter.hashization) {
+                console.log("名字哈希化生效")
+                toggleSwitch('hashization',false)
+            }
 
-            // 发送请求获取 OSS 配置文件
-            fetch("/get-settings")
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("获取 OSS 配置失败");
-                    } else {
-                        alert("获取配置文件配置成功")
-                    }
-                })
         } else {
             alert("配置失败：" + data.message);
         }
@@ -123,14 +133,14 @@ async function autoConfigure() {
 // 保存用户的图床设置（例如：压缩、Markdown、哈希化）
 function saveSettings() {
     const settings = {
-        compress: document.getElementById("compress").parentElement.classList.contains('bg-blue-500'),
+        compress:document.getElementById("compress").parentElement.classList.contains('bg-blue-500'),
         markdown: document.getElementById("markdown").parentElement.classList.contains('bg-blue-500'),
-        Hashization: document.getElementById("Hashization").parentElement.classList.contains('bg-blue-500')
+        hashization: document.getElementById("hashization").parentElement.classList.contains('bg-blue-500')
     };
 
     fetch('/save-settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(settings)
     })
         .then(response => response.json())

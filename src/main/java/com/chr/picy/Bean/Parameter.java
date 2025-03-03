@@ -24,11 +24,11 @@ public class Parameter {
     /**
      * 是否转换为Markdown格式（为false时上传后默认复制图片链接，为true时上传后获取Markdown格式链接）
      */
-    Boolean ConvertMarkdown;
+    Boolean convertMarkdown;
     /**
      * 名称是否哈希化
      */
-    Boolean Hashization = true;
+    Boolean hashization = true;
     /**
      * 上传目录
      */

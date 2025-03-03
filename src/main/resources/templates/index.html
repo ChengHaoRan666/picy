@@ -56,13 +56,13 @@
                 <div class="flex items-center space-x-4">
                     <i class="fas fa-bell text-gray-600 text-xl cursor-pointer" onclick="toggleModal(true)"></i>
                     <i class="fas fa-cog text-gray-600 text-xl cursor-pointer" onclick="toggleSettings(event)"></i>
-              </div>
+                </div>
 
                 <div id="settingsDropdown" class="absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg p-4 hidden">
                     <div class="space-y-4">
                         <div class="flex items-center space-x-2">
                             <span class="flex items-center w-10 h-6 bg-gray-300 rounded-full p-1 cursor-pointer"
-                                  onclick="toggleSwitch('compress')">
+                                  onclick="toggleSwitch('compress',true)">
                                 <span id="compress"
                                       class="bg-white w-4 h-4 rounded-full shadow transform duration-300 ease-in-out"></span>
                             </span>
@@ -70,7 +70,7 @@
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="flex items-center w-10 h-6 bg-gray-300 rounded-full p-1 cursor-pointer"
-                                  onclick="toggleSwitch('markdown')">
+                                  onclick="toggleSwitch('markdown',true)">
                                 <span id="markdown"
                                       class="bg-white w-4 h-4 rounded-full shadow transform duration-300 ease-in-out"></span>
                             </span>
@@ -78,8 +78,8 @@
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="flex items-center w-10 h-6 bg-gray-300 rounded-full p-1 cursor-pointer"
-                                  onclick="toggleSwitch('Hashization')">
-                                <span id="Hashization"
+                                  onclick="toggleSwitch('hashization',true)">
+                                <span id="hashization"
                                       class="bg-white w-4 h-4 rounded-full shadow transform duration-300 ease-in-out"></span>
                             </span>
                             <span class="whitespace-nowrap">名称哈希化</span>
@@ -111,15 +111,21 @@
         <div id="图床配置" class="tab-content ">
             <br>
             <div class="p-6 bg-white shadow rounded-lg w-full">
+                <!--TODO-->
                 <!-- 输入框 + 一键配置 -->
                 <div class="flex items-center space-x-4 mb-4">
                     <input type="password" id="accessKeyId" placeholder="请输入你的 accessKeyId"
-                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><br>
+                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           ><br>
                     <input type="password" id="accessKeySecret" placeholder="请输入你的 accessKeySecret"
-                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><br>
+                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           ><br>
                     <input type="text" id="bucketName" placeholder="请输入你的 bucketName"
-                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><br>
-                    <button onclick="autoConfigure()" class="px-4 py-2 bg-blue-500 text-white rounded-lg whitespace-nowrap">配置</button>
+                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           ><br>
+                    <button onclick="autoConfigure()"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-lg whitespace-nowrap">配置
+                    </button>
                 </div>
 
                 <!-- 用户名 & 仓库 -->

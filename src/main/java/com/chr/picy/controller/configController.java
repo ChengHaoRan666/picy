@@ -51,9 +51,11 @@ public class configController {
             session.setAttribute("bucketName", bucketName);
 
             // 将配置同步到云端
+            log.info("上传云端的配置信息：{}", parameter);
             OSSUtil.saveSettingsToOSS(ossClient, bucketName, parameter);
-
-            return ResponseEntity.ok(Map.of("location", location, "repo", bucketName));
+            // 获取云端最新配置
+            Parameter newParameter = OSSUtil.readJsonFromOSS(ossClient, bucketName, "setting.json");
+            return ResponseEntity.ok(Map.of("location", location, "repo", bucketName, "parameter", newParameter));
         } catch (Exception e) {
             log.error("OSS 连接失败", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -61,15 +63,6 @@ public class configController {
         }
     }
 
-
-    // 获取配置信息
-    @GetMapping("/get-settings")
-    public String getSettings() {
-        OSS ossClient = ossClientManager.getOssClient();
-        Parameter parameter = OSSUtil.readJsonFromOSS(ossClient, ossClientManager.getBucketName(), "setting.json");
-        log.info("读取的内容{}", parameter);
-        return "index";  // 或者根据需求返回配置信息
-    }
 
     // 发送设置的状态到后端,写入json文件
     @PostMapping("/save-settings")
@@ -85,7 +78,6 @@ public class configController {
         }
         return ResponseEntity.ok(Collections.singletonMap("message", "Settings saved successfully"));
     }
-
 }
 
 /*

@@ -28,49 +28,12 @@ public class OSSUtil {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * 向setting.json文件里存配置信息
-     */
-    public static void saveSettingsToOSS(OSS ossClient, String bucketName, Parameter parameter) throws Exception {
-        // 先获取旧配置信息，如果有变动，更新
-        Parameter oldParameter = readJsonFromOSS(ossClient, bucketName, "setting.json");
-        parameter = updateParameter(oldParameter, parameter);
-        String jsonString = objectMapper.writeValueAsString(parameter);
-        InputStream inputStream = new java.io.ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
-        ossClient.putObject(new PutObjectRequest(bucketName, "setting.json", inputStream));
-    }
-
-    /**
-     * 辅助函数，比较旧配置类和新配置类的不同进行合并
-     *
-     * @param oldParameter 旧配置类
-     * @param newParameter 新配置类
-     * @return 合并后的配置类
-     */
-    private static Parameter updateParameter(Parameter oldParameter, Parameter newParameter) {
-        if (oldParameter == null) return newParameter; // 旧配置为空，直接使用新配置
-
-        if (newParameter == null) return oldParameter; // 新配置为空，保持旧配置
-
-        return new Parameter(
-                newParameter.getCompress() != null ? newParameter.getCompress() : oldParameter.getCompress(),
-                newParameter.getCompressionAlgorithm() != null ? newParameter.getCompressionAlgorithm() : oldParameter.getCompressionAlgorithm(),
-                newParameter.getConvertMarkdown() != null ? newParameter.getConvertMarkdown() : oldParameter.getConvertMarkdown(),
-                newParameter.getHashization() != null ? newParameter.getHashization() : oldParameter.getHashization(),
-                newParameter.getCatalogue() != null ? newParameter.getCatalogue() : oldParameter.getCatalogue(),
-                newParameter.getAccessKeyId() != null ? newParameter.getAccessKeyId() : oldParameter.getAccessKeyId(),
-                newParameter.getAccessKeySecret() != null ? newParameter.getAccessKeySecret() : oldParameter.getAccessKeySecret(),
-                newParameter.getBucketName() != null ? newParameter.getBucketName() : oldParameter.getBucketName()
-        );
-    }
-
-
-    /**
      * 通过 accessKeyId 和 accessKeySecret 和 bucketName 获取 region
      *
-     * @param accessKeyId
-     * @param accessKeySecret
-     * @param bucketName
-     * @return region
+     * @param accessKeyId 秘钥ID
+     * @param accessKeySecret 秘钥Key
+     * @param bucketName 存储桶
+     * @return region 区域
      */
     public static String getRegionFromBucket(String accessKeyId, String accessKeySecret, String bucketName) {
         // 先用一个默认的公共 endpoint 连接
@@ -115,13 +78,55 @@ public class OSSUtil {
     }
 
 
+
+
+    /**
+     * 向setting.json文件里存配置信息
+     */
+    public static void saveSettingsToOSS(OSS ossClient, String bucketName, Parameter parameter) throws Exception {
+        // 先获取旧配置信息，如果有变动，更新
+        Parameter oldParameter = readJsonFromOSS(ossClient, bucketName, "setting.json");
+        parameter = updateParameter(oldParameter, parameter);
+
+        // 转为 json 字符串
+        String jsonString = objectMapper.writeValueAsString(parameter);
+
+        // 获取流上传到云端
+        InputStream inputStream = new java.io.ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
+        ossClient.putObject(new PutObjectRequest(bucketName, "setting.json", inputStream));
+    }
+
+    /**
+     * 辅助函数，比较旧配置类和新配置类的不同进行合并
+     *
+     * @param oldParameter 旧配置类
+     * @param newParameter 新配置类
+     * @return 合并后的配置类
+     */
+    private static Parameter updateParameter(Parameter oldParameter, Parameter newParameter) {
+        if (oldParameter == null) return newParameter; // 旧配置为空，直接使用新配置
+
+        if (newParameter == null) return oldParameter; // 新配置为空，保持旧配置
+
+        return new Parameter(
+                newParameter.getCompress() != null ? newParameter.getCompress() : oldParameter.getCompress(),
+                newParameter.getCompressionAlgorithm() != null ? newParameter.getCompressionAlgorithm() : oldParameter.getCompressionAlgorithm(),
+                newParameter.getConvertMarkdown() != null ? newParameter.getConvertMarkdown() : oldParameter.getConvertMarkdown(),
+                newParameter.getHashization() != null ? newParameter.getHashization() : oldParameter.getHashization(),
+                newParameter.getCatalogue() != null ? newParameter.getCatalogue() : oldParameter.getCatalogue(),
+                newParameter.getAccessKeyId() != null ? newParameter.getAccessKeyId() : oldParameter.getAccessKeyId(),
+                newParameter.getAccessKeySecret() != null ? newParameter.getAccessKeySecret() : oldParameter.getAccessKeySecret(),
+                newParameter.getBucketName() != null ? newParameter.getBucketName() : oldParameter.getBucketName()
+        );
+    }
+
     /**
      * 获取 json 文件内容
      *
-     * @param ossClient
-     * @param bucketName
-     * @param jsonFile
-     * @return
+     * @param ossClient OSS链接对象
+     * @param bucketName 存储桶名
+     * @param jsonFile 文件吗
+     * @return 配置类对象
      */
     public static Parameter readJsonFromOSS(OSS ossClient, String bucketName, String jsonFile) {
         try {
