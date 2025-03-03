@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.Map;
@@ -55,6 +53,7 @@ public class configController {
             OSSUtil.saveSettingsToOSS(ossClient, bucketName, parameter);
             // 获取云端最新配置
             Parameter newParameter = OSSUtil.readJsonFromOSS(ossClient, bucketName, "setting.json");
+            log.info("云端最新配置信息：{}",newParameter);
             return ResponseEntity.ok(Map.of("location", location, "repo", bucketName, "parameter", newParameter));
         } catch (Exception e) {
             log.error("OSS 连接失败", e);
@@ -79,16 +78,3 @@ public class configController {
         return ResponseEntity.ok(Collections.singletonMap("message", "Settings saved successfully"));
     }
 }
-
-/*
- * 压缩图片
- * 压缩算法
- * 转换Markdown
- * 名称哈希化
- *
- * 目录
- *
- * 秘钥key
- * 秘钥val
- * 存储桶
- */

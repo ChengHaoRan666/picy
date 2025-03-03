@@ -57,14 +57,29 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // 将按钮变色
-// 两个地方用：1. 用户修改配置，需要传入true让配置保存 2. 在登录时把用户的配置显示
-function toggleSwitch(id, save) {
+// 两个地方用：1. 用户修改配置，需要传入true让配置保存 2. 在登录时把用户的配置显示，传入false
+function toggleSwitch(id, save, state) {
     const element = document.getElementById(id);
-    element.parentElement.classList.toggle('bg-blue-500');
-    element.classList.toggle('translate-x-4');
-    // 如果将配置保存
+    const parent = element.parentElement;
+
+    if (state === true) {
+        // 强制设为开启状态
+        parent.classList.add('bg-blue-500');
+        element.classList.add('translate-x-4');
+    } else if (state === false) {
+        // 强制设为关闭状态
+        parent.classList.remove('bg-blue-500');
+        element.classList.remove('translate-x-4');
+    } else {
+        // 默认切换状态
+        parent.classList.toggle('bg-blue-500');
+        element.classList.toggle('translate-x-4');
+    }
+
+    // 如果需要保存配置
     if (save) saveSettings();
 }
+
 
 // 监听目录选择，切换“新建目录”输入框的显示状态
 document.addEventListener("DOMContentLoaded", function () {
@@ -110,15 +125,15 @@ async function autoConfigure() {
             console.log(parameter.compress);
             if (parameter.compress) {
                 console.log("压缩图片生效")
-                toggleSwitch('compress',false)
+                toggleSwitch('compress',false,true)
             }
-            if (parameter.hashization) {
+            if (parameter.convertMarkdown) {
                 console.log("转换Markdown生效")
-                toggleSwitch('markdown',false)
+                toggleSwitch('markdown',false,true)
             }
             if (parameter.hashization) {
                 console.log("名字哈希化生效")
-                toggleSwitch('hashization',false)
+                toggleSwitch('hashization',false,true)
             }
 
         } else {
@@ -134,7 +149,7 @@ async function autoConfigure() {
 function saveSettings() {
     const settings = {
         compress:document.getElementById("compress").parentElement.classList.contains('bg-blue-500'),
-        markdown: document.getElementById("markdown").parentElement.classList.contains('bg-blue-500'),
+        convertMarkdown: document.getElementById("markdown").parentElement.classList.contains('bg-blue-500'),
         hashization: document.getElementById("hashization").parentElement.classList.contains('bg-blue-500')
     };
 
@@ -159,8 +174,8 @@ function saveSettings() {
 }
 
 
-// 提交图床配置到后端
-function submitConfig() {
+// 提交目录的配置到后端上传到OSS里
+function catalogueSubmit() {
     const token = document.getElementById("token").value;
     const location = document.getElementById("location").innerText;
     const repo = document.getElementById("repo").innerText;
