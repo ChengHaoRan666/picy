@@ -31,6 +31,8 @@ function toggleSettings(event) {
 
 // 在页面加载完成后，绑定事件监听器
 document.addEventListener("DOMContentLoaded", function () {
+    changeTab("图床配置"); // 默认选中“图床配置”
+
     const settingsIcon = document.querySelector(".fa-cog"); // 获取设置图标
     const settingsDropdown = document.getElementById("settingsDropdown");
 
@@ -117,25 +119,24 @@ async function autoConfigure() {
         // 获取后端传过来的配置信息
         const parameter = data.parameter;
         if (response.ok) {
+            // TODO 还要修改上传目录
             // 配置成功，更新地点和仓库
             document.getElementById("location").innerText = data.location;
             document.getElementById("repo").innerText = data.repo;
-            // 通过Parameter修改其他配置的前端显示
-            console.log(parameter);
-            console.log(parameter.compress);
+
             if (parameter.compress) {
-                console.log("压缩图片生效")
                 toggleSwitch('compress',false,true)
             }
             if (parameter.convertMarkdown) {
-                console.log("转换Markdown生效")
                 toggleSwitch('markdown',false,true)
             }
             if (parameter.hashization) {
-                console.log("名字哈希化生效")
                 toggleSwitch('hashization',false,true)
             }
-
+            if(parameter.catalogue){
+                console.log(parameter.catalogue);
+            }
+            alert("配置成功");
         } else {
             alert("配置失败：" + data.message);
         }
@@ -143,7 +144,6 @@ async function autoConfigure() {
         alert("请求失败：" + error.message);
     }
 }
-
 
 // 保存用户的图床设置（例如：压缩、Markdown、哈希化）
 function saveSettings() {
@@ -170,24 +170,37 @@ function saveSettings() {
             console.error("请求失败:", error);
             alert("保存失败，发生错误");
         });
-
 }
-
 
 // 提交目录的配置到后端上传到OSS里
 function catalogueSubmit() {
-    const token = document.getElementById("token").value;
-    const location = document.getElementById("location").innerText;
-    const repo = document.getElementById("repo").innerText;
+    // 获取选择的目录类型
     const dirType = document.querySelector("input[name='dirType']:checked").value;
-    const customDir = document.getElementById("customDir").value;
+    let customDir = '';
+
+    // 如果选择根目录，就设置为 /
+    if(dirType === 'root'){
+        customDir='/'
+    }
+
+    // 如果选择时间目录，就设置为今天时间
+    if(dirType === 'date'){
+        customDir='/'+getCurrentDate()
+    }
+
+    // 如果选择的是自定义目录，获取用户输入的目录路径
+    if (dirType === 'custom') {
+        customDir = '/'+document.getElementById("customDir").value;
+        // 如果没有输入内容，可以选择不提交或者给出提示
+        if (!customDir) {
+            alert("请填写自定义目录名称");
+            return;
+        }
+    }
 
     // 组装提交数据
     const configData = {
-        token: token,
-        location: location,
-        repo: repo,
-        directory: dirType === "custom" ? customDir : dirType
+        catalogue: customDir
     };
 
     // 发送 POST 请求到后端
@@ -199,4 +212,14 @@ function catalogueSubmit() {
         .then(response => response.json())
         .then(data => alert("配置成功：" + JSON.stringify(data)))
         .catch(error => console.error("提交失败:", error));
+}
+
+
+// 获取今天的日期，格式为 YYYYMMDD
+function getCurrentDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0'); // 月份从 0 开始，因此加 1
+    const day = today.getDate().toString().padStart(2, '0'); // 确保天数是两位数
+    return `${year}${month}${day}`; // 返回没有分隔符的格式
 }

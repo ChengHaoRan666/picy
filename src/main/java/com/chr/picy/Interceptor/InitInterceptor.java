@@ -44,6 +44,7 @@ public class InitInterceptor implements HandlerInterceptor {
             // 将 OSS 放在 Spring 里管理
             ossClientManager.setOssClient(ossClient, bucketName);
             log.info("成功注入OSS连接...");
+
         }
         return true;
     }

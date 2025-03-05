@@ -114,11 +114,14 @@
                 <!-- 输入框 + 一键配置 -->
                 <div class="flex items-center space-x-4 mb-4">
                     <input type="password" id="accessKeyId" placeholder="请输入你的 accessKeyId"
-                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><br>
+                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           ><br>
                     <input type="password" id="accessKeySecret" placeholder="请输入你的 accessKeySecret"
-                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><br>
+                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           ><br>
                     <input type="text" id="bucketName" placeholder="请输入你的 bucketName"
-                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><br>
+                           class="w-5/6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           ><br>
                     <button onclick="autoConfigure()"
                             class="px-4 py-2 bg-blue-500 text-white rounded-lg whitespace-nowrap">配置
                     </button>
@@ -142,32 +145,30 @@
 
                 <!-- 目录 -->
                 <div class="grid grid-cols-3 gap-4 items-center border p-4 rounded-lg mt-4">
-                    <!-- 左侧标题 -->
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-folder text-gray-600"></i>
                         <span class="text-gray-700">目录：</span>
                     </div>
-
-                    <!-- 目录选项和输入框 -->
                     <div class="col-span-2 flex items-center space-x-6">
                         <div class="flex items-center space-x-2">
-                            <input type="radio" name="dirType" value="root" checked>
-                            <label>根目录</label>
+                            <input type="radio" id="root" name="dirType" value="root" checked>
+                            <label for="root">根目录</label>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <input type="radio" name="dirType" value="date">
-                            <label>日期目录</label>
+                            <input type="radio" id="date" name="dirType" value="date">
+                            <label for="date">日期目录</label>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <input type="radio" name="dirType" value="custom">
-                            <label>新建目录</label>
+                            <input type="radio" id="custom" name="dirType" value="custom">
+                            <label for="custom">新建目录</label>
                         </div>
                         <!-- 新建目录输入框 -->
-                        <input type="text" id="customDir" class="border p-2 rounded-lg w-1/3 hidden">
+                        <input type="text" id="customDir" class="border p-2 rounded-lg w-1/3 hidden" placeholder="请输入自定义目录">
                         <!-- 确定按钮 -->
-                        <button onclick="catalogueSubmit()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">确定
-                        </button>
+                        <button onclick="catalogueSubmit()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">确定</button>
                     </div>
+
+
                 </div>
             </div>
         </div>
